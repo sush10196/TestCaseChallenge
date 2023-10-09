@@ -1,0 +1,79 @@
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+
+public class BlockStreamInfoTest {
+    private WebDriver driver;
+    private final String url = "https://blockstream.info/block/000000000000000000076c036ff5119e5a5a74df77abf64203473364509f7732";
+
+    @BeforeTest
+    public void setUp() {
+        // Set up WebDriver configuration
+        System.setProperty("webdriver.chrome.driver", "path/to/chromedriver.exe"); // Replace with the path to your chromedriver executable
+        driver = new ChromeDriver();
+    }
+
+    @Test
+    public void testVisitBlockStreamInfoPage() {
+        // Open the URL
+        driver.get(url);
+
+        // Perform assertions or interactions as needed
+        WebElement pageTitle = driver.findElement(By.tagName("h1"));
+        String titleText = pageTitle.getText();
+        // You can add more assertions here based on your requirements
+    }
+
+  @Test
+    public void validateSectionHeading() {
+        // Locate the section heading element
+        WebElement sectionHeadingElement = driver.findElement(By.xpath("//*[@id="explorer"]/div/div/div[2]/div[2]/div[3]/h3"));
+
+        // Get the text from the section heading
+        String sectionHeadingText = sectionHeadingElement.getText();
+
+        // Assert that the section heading contains the expected text
+        Assert.assertEquals(sectionHeadingText, "25 of 2875 Transactions", "Section heading text does not match the expected value.");
+    }
+
+	
+  @Test
+    public void parseTransactions() {
+        // Loop through the transactions
+        for (int i = 0; i < 25; i++) {
+            // Locate the transaction element by its XPath (you may need to inspect the page to find the correct XPath)
+            String transactionXPath = "//div[@class='transaction'][" + (i + 1) + "]";
+            WebElement transactionElement = driver.findElement(By.xpath(transactionXPath));
+
+            // Parse the input and output counts
+            WebElement inputCountElement = transactionElement.findElement(By.xpath(".//div[contains(text(),'Inputs')]/following-sibling::div"));
+            WebElement outputCountElement = transactionElement.findElement(By.xpath(".//div[contains(text(),'Outputs')]/following-sibling::div"));
+
+            int inputCount = Integer.parseInt(inputCountElement.getText().trim());
+            int outputCount = Integer.parseInt(outputCountElement.getText().trim());
+
+            // Check if the transaction has exactly 1 input and 2 outputs
+            if (inputCount == 1 && outputCount == 2) {
+                WebElement transactionHashElement = transactionElement.findElement(By.xpath(".//a[@class='hash']"));
+                String transactionHash = transactionHashElement.getText().trim();
+                System.out.println("Transaction Hash: " + transactionHash);
+            }
+        }
+    }
+
+
+    @AfterTest
+    public void tearDown() {
+        // Close the WebDriver session
+        if (driver != null) {
+            driver.quit();
+        }
+    }
+}
+
+
+
